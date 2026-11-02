@@ -385,7 +385,10 @@ class CuevanaSource implements core.SourcePlugin {
         if (url == null || !seen.add(url)) continue;
         final siteLabel =
             (li.querySelector('span')?.text ?? '').replaceFirst(RegExp(r'^\s*Servidor\s+'), '').trim();
-        out.add(core.VideoServer(nombre: '${hostLabel(url, siteLabel)} ($lang)', url: url));
+        // Hyper y Nebula (IDs 1 y 3) son dos espejos de Streamwish con el mismo nombre:
+        // se distinguen dentro del paréntesis, que la app descarta al elegir el extractor.
+        final detail = isStreamwishHost(url) && siteLabel.isNotEmpty ? '$lang · $siteLabel' : lang;
+        out.add(core.VideoServer(nombre: '${hostLabel(url, siteLabel)} ($detail)', url: url));
       }
     }
 
@@ -403,15 +406,19 @@ class CuevanaSource implements core.SourcePlugin {
   }
 
   /// Extractores que tiene el proxy para los hosts de este sitio.
-  static const proxySupported = ['filemoon', 'doodstream'];
+  static const proxySupported = ['filemoon', 'doodstream', 'streamwish'];
+
+  /// true para los hosts `.lol` de los tokens con ID 1 y 3.
+  static bool isStreamwishHost(String url) =>
+      url.startsWith(_tokenServers['1']!) || url.startsWith(_tokenServers['3']!);
 
   /// Nombre legible del servidor a partir de su URL final.
   static String hostLabel(String url, String siteLabel) {
     final host = Uri.tryParse(url)?.host.toLowerCase() ?? '';
     if (host.contains('filemoon')) return 'Filemoon';
     if (host.contains('dood')) return 'Doodstream';
-    // Hosts anónimos (.lol) del token con ID 1: sus páginas son de VidHide.
-    if (url.startsWith(_tokenServers['1']!)) return 'Vidhide';
+    // Hosts anónimos (.lol) de los tokens con ID 1 y 3: el proxy los extrae con `streamwish`.
+    if (isStreamwishHost(url)) return 'Streamwish';
     if (host.contains('vsembed')) return 'Vsembed';
     if (host.contains('vidlink')) return 'Vidlink';
     if (host.contains('videasy')) return 'Videasy';

@@ -69,8 +69,12 @@ void main() {
     test('nombres a partir de la URL final', () {
       expect(CuevanaSource.hostLabel('https://filemoon.sx/e/abc', 'Hyper'), 'Filemoon');
       expect(CuevanaSource.hostLabel('https://dood.li/e/abc', 'Hyper'), 'Doodstream');
-      expect(CuevanaSource.hostLabel('https://ikhjerbhye3wjkhoduh5xiczuvd.lol/v/abc', 'Hyper'), 'Vidhide');
-      expect(CuevanaSource.hostLabel('https://lkhjerbhye3wjkhodvh5xlczuvd.lol/e/abc', 'Nebula'), 'Nebula');
+      // Los hosts .lol (IDs 1 y 3) se resuelven con el extractor streamwish del proxy.
+      expect(CuevanaSource.hostLabel('https://ikhjerbhye3wjkhoduh5xiczuvd.lol/v/abc', 'Hyper'), 'Streamwish');
+      expect(CuevanaSource.hostLabel('https://lkhjerbhye3wjkhodvh5xlczuvd.lol/e/abc', 'Nebula'), 'Streamwish');
+      expect(CuevanaSource.isStreamwishHost('https://ikhjerbhye3wjkhoduh5xiczuvd.lol/v/abc'), isTrue);
+      expect(CuevanaSource.isStreamwishHost('https://lkhjerbhye3wjkhodvh5xlczuvd.lol/e/abc'), isTrue);
+      expect(CuevanaSource.isStreamwishHost('https://filemoon.sx/e/abc'), isFalse);
       expect(CuevanaSource.hostLabel('https://player.videasy.net/movie/1', 'Trinity'), 'Videasy');
     });
   });
